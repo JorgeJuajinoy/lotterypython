@@ -42,7 +42,7 @@ def safe_save(df: pd.DataFrame, filepath: str) -> bool:
 def _seed_from_legacy(filepath: str, legacy: str) -> pd.DataFrame:
     """Si el archivo propio no existe, carga el legado como punto de partida."""
     if not os.path.exists(filepath) and os.path.exists(legacy):
-        print(f"  ↪ Semilla legado: {legacy}")
+        print(f"  -> Semilla legado: {legacy}")
         return pd.read_excel(legacy)
     if os.path.exists(filepath):
         return pd.read_excel(filepath)
@@ -86,14 +86,21 @@ def _parse_baloto_page(html: str) -> list[dict]:
     return rows
 
 
-def scrape_baloto(n_sorteos: int = 300) -> pd.DataFrame:
-    """Scrapea hasta n_sorteos de Baloto+Revancha paginando el sitio."""
-    print(f"[SCRAPER] Baloto — objetivo {n_sorteos} sorteos...")
+def scrape_baloto(n_sorteos: int = 300, existing_ids: set = None) -> pd.DataFrame:
+    """
+    Scrapea sorteos de Baloto+Revancha paginando el sitio de forma incremental.
+    Se detiene inmediatamente si encuentra un Sorteo ID ya existente localmente.
+    """
+    if existing_ids is None:
+        existing_ids = set()
+        
+    print(f"[SCRAPER] Baloto — buscando nuevos sorteos...")
     all_rows: list[dict] = []
     page = 1
     base_url = "https://www.baloto.com/resultados"
+    stop_scraping = False
 
-    while len(all_rows) < n_sorteos:
+    while len(all_rows) < n_sorteos and not stop_scraping:
         url = base_url if page == 1 else f"{base_url}?page={page}"
         try:
             resp = requests.get(url, headers=HEADERS, timeout=20)
@@ -104,14 +111,26 @@ def scrape_baloto(n_sorteos: int = 300) -> pd.DataFrame:
             if not rows:
                 print(f"  Sin filas en página {page}. Fin de datos.")
                 break
-            all_rows.extend(rows)
-            print(f"  Página {page}: {len(rows)} filas | Total: {len(all_rows)}")
+                
+            # Verificar de forma incremental
+            for r in rows:
+                # Si encontramos un sorteo que ya tenemos guardado localmente, paramos
+                if r["Sorteo"] in existing_ids:
+                    print(f"  -> Encontrado sorteo existente '{r['Sorteo']}'. Deteniendo scraping.")
+                    stop_scraping = True
+                    break
+                all_rows.append(r)
+                
+            if stop_scraping:
+                break
+                
+            print(f"  Página {page}: {len(rows)} filas | Nuevos encontrados: {len(all_rows)}")
             page += 1
         except Exception as e:
             print(f"  [ERROR] Página {page}: {e}")
             break
 
-    df = pd.DataFrame(all_rows[:n_sorteos])
+    df = pd.DataFrame(all_rows)
     return df
 
 
@@ -143,14 +162,21 @@ def _parse_miloto_page(html: str) -> list[dict]:
     return rows
 
 
-def scrape_miloto(n_sorteos: int = 300) -> pd.DataFrame:
-    """Scrapea hasta n_sorteos de Miloto paginando el sitio."""
-    print(f"[SCRAPER] Miloto — objetivo {n_sorteos} sorteos...")
+def scrape_miloto(n_sorteos: int = 300, existing_ids: set = None) -> pd.DataFrame:
+    """
+    Scrapea sorteos de Miloto de forma incremental.
+    Se detiene inmediatamente si encuentra un Sorteo ID ya existente localmente.
+    """
+    if existing_ids is None:
+        existing_ids = set()
+
+    print(f"[SCRAPER] Miloto — buscando nuevos sorteos...")
     all_rows: list[dict] = []
     page = 1
     base_url = "https://www.baloto.com/miloto/resultados/"
+    stop_scraping = False
 
-    while len(all_rows) < n_sorteos:
+    while len(all_rows) < n_sorteos and not stop_scraping:
         url = base_url if page == 1 else f"{base_url}?page={page}"
         try:
             resp = requests.get(url, headers=HEADERS, timeout=20)
@@ -161,15 +187,26 @@ def scrape_miloto(n_sorteos: int = 300) -> pd.DataFrame:
             if not rows:
                 print(f"  Sin filas en página {page}. Fin de datos.")
                 break
-            all_rows.extend(rows)
-            print(f"  Página {page}: {len(rows)} filas | Total: {len(all_rows)}")
+                
+            for r in rows:
+                if r["Sorteo"] in existing_ids:
+                    print(f"  -> Encontrado sorteo existente '{r['Sorteo']}'. Deteniendo scraping.")
+                    stop_scraping = True
+                    break
+                all_rows.append(r)
+                
+            if stop_scraping:
+                break
+                
+            print(f"  Página {page}: {len(rows)} filas | Nuevos encontrados: {len(all_rows)}")
             page += 1
         except Exception as e:
             print(f"  [ERROR] Página {page}: {e}")
             break
 
-    df = pd.DataFrame(all_rows[:n_sorteos])
+    df = pd.DataFrame(all_rows)
     return df
+
 
 
 # ─────────────────────────────────────────────
@@ -177,36 +214,56 @@ def scrape_miloto(n_sorteos: int = 300) -> pd.DataFrame:
 # ─────────────────────────────────────────────
 def actualizar_datos(n_sorteos: int = 300) -> dict[str, pd.DataFrame]:
     """
-    Actualiza (o crea) los archivos de datos con los últimos n_sorteos.
-    Retorna dict con DataFrames: {"BALOTO": df_b, "MILOTO": df_m}
+    Actualiza (o crea) los archivos de datos con los últimos n_sorteos de forma incremental.
+    Evita scrape-ar todo de nuevo leyendo los IDs ya guardados.
     """
     resultados = {}
 
     # --- BALOTO ---
     legacy_b = _seed_from_legacy(config.FILES["BALOTO"], config.BALOTO_LEGACY)
-    fresh_b  = scrape_baloto(n_sorteos)
+    
+    # Extraemos los IDs de sorteos que ya tenemos guardados localmente
+    existing_b_ids = set()
+    if not legacy_b.empty and "Sorteo" in legacy_b.columns:
+        existing_b_ids = set(legacy_b["Sorteo"].astype(str).tolist())
+        
+    fresh_b = scrape_baloto(n_sorteos, existing_ids=existing_b_ids)
 
     if not fresh_b.empty:
-        # Combinar con legado para no perder datos históricos
+        # Combinar los nuevos resultados arriba de los existentes
         if not legacy_b.empty:
             combined = pd.concat([fresh_b, legacy_b], ignore_index=True)
             combined.drop_duplicates(subset=["Sorteo", "Tipo"], inplace=True)
         else:
             combined = fresh_b
+        
+        # Ordenamos sorteos descendente si el ID es numérico para asegurar orden
+        try:
+            combined["Sorteo_Int"] = combined["Sorteo"].astype(int)
+            combined.sort_values(by="Sorteo_Int", ascending=False, inplace=True)
+            combined.drop(columns=["Sorteo_Int"], inplace=True)
+        except Exception:
+            pass
+            
         combined = combined.head(n_sorteos)
         safe_save(combined, config.FILES["BALOTO"])
         resultados["BALOTO"] = combined
-        print(f"  ✓ Baloto guardado: {len(combined)} registros")
+        print(f"  [OK] Baloto actualizado: {len(fresh_b)} nuevos | Total: {len(combined)} registros")
     elif not legacy_b.empty:
         resultados["BALOTO"] = legacy_b
-        print(f"  ↪ Usando datos legado Baloto: {len(legacy_b)} registros")
+        print(f"  -> Baloto al dia (usando cache): {len(legacy_b)} registros")
     else:
         resultados["BALOTO"] = pd.DataFrame()
-        print("  ✗ Sin datos Baloto")
+        print("  [ERROR] Sin datos Baloto")
 
     # --- MILOTO ---
     legacy_m = _seed_from_legacy(config.FILES["MILOTO"], config.MILOTO_LEGACY)
-    fresh_m  = scrape_miloto(n_sorteos)
+    
+    existing_m_ids = set()
+    if not legacy_m.empty and "Sorteo" in legacy_m.columns:
+        existing_m_ids = set(legacy_m["Sorteo"].astype(str).tolist())
+        
+    fresh_m = scrape_miloto(n_sorteos, existing_ids=existing_m_ids)
 
     if not fresh_m.empty:
         if not legacy_m.empty:
@@ -214,16 +271,24 @@ def actualizar_datos(n_sorteos: int = 300) -> dict[str, pd.DataFrame]:
             combined_m.drop_duplicates(subset=["Sorteo"], inplace=True)
         else:
             combined_m = fresh_m
+            
+        try:
+            combined_m["Sorteo_Int"] = combined_m["Sorteo"].astype(int)
+            combined_m.sort_values(by="Sorteo_Int", ascending=False, inplace=True)
+            combined_m.drop(columns=["Sorteo_Int"], inplace=True)
+        except Exception:
+            pass
+            
         combined_m = combined_m.head(n_sorteos)
         safe_save(combined_m, config.FILES["MILOTO"])
         resultados["MILOTO"] = combined_m
-        print(f"  ✓ Miloto guardado: {len(combined_m)} registros")
+        print(f"  [OK] Miloto actualizado: {len(fresh_m)} nuevos | Total: {len(combined_m)} registros")
     elif not legacy_m.empty:
         resultados["MILOTO"] = legacy_m
-        print(f"  ↪ Usando datos legado Miloto: {len(legacy_m)} registros")
+        print(f"  -> Miloto al dia (usando cache): {len(legacy_m)} registros")
     else:
         resultados["MILOTO"] = pd.DataFrame()
-        print("  ✗ Sin datos Miloto")
+        print("  [ERROR] Sin datos Miloto")
 
     return resultados
 
