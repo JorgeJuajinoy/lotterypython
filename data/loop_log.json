@@ -202,5 +202,109 @@
       "M8_tendencia": -0.095,
       "M9_markov": -0.08
     }
+  },
+  {
+    "iteracion": 3,
+    "timestamp": "2026-07-14 16:30:34",
+    "acierto_pct": 0.08,
+    "n_evaluadas": 100,
+    "n_hits": 8,
+    "pesos_delta": {
+      "M1_freq": -0.079,
+      "M3_gap": -0.066,
+      "M8_tendencia": -0.085,
+      "M9_markov": -0.072
+    }
+  },
+  {
+    "iteracion": 4,
+    "timestamp": "2026-07-14 16:31:16",
+    "acierto_pct": 0.12,
+    "n_evaluadas": 100,
+    "n_hits": 12,
+    "pesos_delta": {
+      "M1_freq": -0.071,
+      "M3_gap": -0.059,
+      "M8_tendencia": -0.077,
+      "M9_markov": -0.065
+    }
+  },
+  {
+    "iteracion": 1,
+    "timestamp": "2026-07-14 16:33:21",
+    "acierto_pct": 0.12,
+    "n_evaluadas": 100,
+    "n_hits": 12,
+    "pesos_delta": {
+      "M1_freq": -0.064,
+      "M3_gap": -0.053,
+      "M8_tendencia": -0.069,
+      "M9_markov": -0.059
+    }
+  },
+  {
+    "iteracion": 2,
+    "timestamp": "2026-07-14 16:33:52",
+    "acierto_pct": 0.12,
+    "n_evaluadas": 100,
+    "n_hits": 12,
+    "pesos_delta": {
+      "M1_freq": -0.057,
+      "M3_gap": -0.048,
+      "M8_tendencia": -0.062,
+      "M9_markov": -0.053
+    }
+  },
+  {
+    "iteracion": 3,
+    "timestamp": "2026-07-14 16:34:15",
+    "acierto_pct": 0.14,
+    "n_evaluadas": 100,
+    "n_hits": 14,
+    "pesos_delta": {
+      "M1_freq": -0.052,
+      "M3_gap": -0.043,
+      "M8_tendencia": -0.056,
+      "M9_markov": -0.047
+    }
+  },
+  {
+    "iteracion": 4,
+    "timestamp": "2026-07-14 16:34:56",
+    "acierto_pct": 0.14,
+    "n_evaluadas": 100,
+    "n_hits": 14,
+    "pesos_delta": {
+      "M1_freq": -0.046,
+      "M3_gap": -0.039,
+      "M8_tendencia": -0.05,
+      "M9_markov": -0.043
+    }
+  },
+  {
+    "iteracion": 5,
+    "timestamp": "2026-07-14 16:35:20",
+    "acierto_pct": 0.12,
+    "n_evaluadas": 100,
+    "n_hits": 12,
+    "pesos_delta": {
+      "M1_freq": -0.042,
+      "M3_gap": -0.035,
+      "M8_tendencia": -0.045,
+      "M9_markov": -0.038
+    }
+  },
+  {
+    "iteracion": 6,
+    "timestamp": "2026-07-14 16:35:47",
+    "acierto_pct": 0.12,
+    "n_evaluadas": 100,
+    "n_hits": 12,
+    "pesos_delta": {
+      "M1_freq": -0.038,
+      "M3_gap": -0.031,
+      "M8_tendencia": -0.041,
+      "M9_markov": -0.035
+    }
   }
 ]
