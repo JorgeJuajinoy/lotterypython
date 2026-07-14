@@ -1,0 +1,149 @@
+============================================================
+LOTTERY LOOP — INSTRUCCIONES DE IMPLEMENTACIÓN Y USO
+============================================================
+Versión: 1.0  |  Fecha: 2026-07-14
+Autor:   Generado automáticamente por Antigravity AI
+============================================================
+
+DESCRIPCIÓN
+-----------
+Sistema de ciclo iterativo (Loop) para predecir jugadas de:
+  - Baloto (miércoles y sábados)
+  - Revancha (miércoles y sábados)
+  - Miloto (lunes, martes, jueves, viernes)
+
+Usa 10 métodos estadísticos + IA (Gemini) y se auto-ajusta
+hasta alcanzar un objetivo de acierto configurable.
+
+ESTRUCTURA DE ARCHIVOS
+----------------------
+Lottery/
+├── config.py           → Configuración central (rutas, API key, reglas)
+├── scraper.py          → Obtiene los últimos 300 sorteos de la web
+├── analisis.py         → 10 métodos estadísticos + IA
+├── sugerencias.py      → Genera máximo 2 jugadas por juego
+├── verificacion.py     → Compara sugerencias vs. resultados reales
+├── loop.py             → Orquestador del ciclo completo
+├── informe.py          → Genera HTML + Excel premium
+├── requirements.txt    → Dependencias Python
+├── instrucciones.txt   → Este archivo
+├── data/
+│   ├── baloto_300.xlsx         → Historial Baloto/Revancha (300 sorteos)
+│   ├── miloto_300.xlsx         → Historial Miloto (300 sorteos)
+│   ├── sugerencias_historico.xlsx  → Sugerencias acumuladas
+│   └── pesos_metodos.json      → Pesos de métodos (auto-ajustables)
+└── reports/
+    ├── sugerencias_hoy.html    → Reporte HTML del día
+    ├── informe_loop.html       → Informe completo del loop
+    └── informe_loop.xlsx       → Informe en Excel
+
+INSTALACIÓN
+-----------
+1. Requiere Python 3.11 o superior.
+
+2. Instalar dependencias:
+   cd D:\Proyectos_Programacion\Python\Lottery
+   pip install -r requirements.txt
+
+3. Configurar tu API key de Gemini en el archivo `.env`:
+   GOOGLE_API_KEY = "tu_api_key_aquí"
+
+4. (Opcional) Si ya tienes datos en:
+   D:\Proyectos_Programacion\machineLearning\baloto\baloto.xlsx
+   D:\Proyectos_Programacion\machineLearning\baloto\miloto.xlsx
+   Se usarán automáticamente como semilla inicial.
+
+USO
+---
+
+A) Ejecutar el loop completo (recomendado):
+   python loop.py
+
+   Esto realiza:
+     1. Scraping de los últimos 300 sorteos de baloto.com
+     2. Análisis con 10 métodos
+     3. Genera 2 sugerencias por juego (Baloto, Revancha, Miloto)
+     4. Verifica aciertos contra resultados históricos
+     5. Ajusta pesos si acierto < 90%
+     6. Repite hasta 10 iteraciones o hasta alcanzar el objetivo
+     7. Genera informe HTML y Excel
+
+B) Ejecutar módulos individuales:
+   python scraper.py        → Solo actualizar datos
+   python analisis.py       → Solo análisis estadístico
+   python sugerencias.py    → Solo generar jugadas (sin IA)
+   python verificacion.py   → Solo verificar aciertos
+   python informe.py        → Solo generar reporte de prueba
+
+VER RESULTADOS
+--------------
+Los informes se guardan en:
+  reports/informe_loop.html   → Abrir en cualquier navegador
+  reports/informe_loop.xlsx   → Abrir en Excel
+
+CRITERIO DE ACIERTO
+-------------------
+Una jugada se considera "hit" si tiene >= 2 coincidencias
+con el resultado oficial del sorteo del mismo día.
+Este parámetro se puede cambiar en config.py:
+  ACIERTO_MIN_NUMS = 2   ← cambiar a 3 para criterio más estricto
+
+CONFIGURACIÓN AVANZADA
+-----------------------
+Todas las opciones están en config.py:
+
+  N_SUGERENCIAS = 2          → Máximo jugadas por juego
+  OBJETIVO_ACIERTO = 0.90    → 90% de hits como objetivo
+  MAX_ITERACIONES = 10       → Iteraciones máximas del loop
+  ACIERTO_MIN_NUMS = 2       → Mínimo aciertos para contar como hit
+  IA_MODEL_NAME = "gemini-2.0-flash"  → Modelo de IA
+
+MÉTODOS ESTADÍSTICOS IMPLEMENTADOS
+------------------------------------
+M1  Frecuencia absoluta         → Números más/menos repetidos históricamente
+M2  Frecuencia por posición     → Números favoritos en cada posición (N1..N5)
+M3  Análisis de rachas          → Números "vencidos" (hace mucho que no salen)
+M4  Suma estadística            → Rango P25-P75 de sumas históricas
+M5  Correlación de pares        → Pares que salen juntos frecuentemente
+M6  Análisis de paridad         → Distribución óptima par/impar
+M7  Análisis por décadas        → Distribución por rangos (1-10, 11-20, etc.)
+M8  Tendencia temporal          → Números en alza/baja en los últimos 30 sorteos
+M9  Cadenas de Markov           → Transiciones probables entre sorteos consecutivos
+M10 IA Gemini                   → Sugerencia contextual con modelo de lenguaje
+
+MEJORAS SUGERIDAS (FUTURAS)
+-----------------------------
+- Agregar Super Astro Sol y Luna al loop
+- Implementar backtesting con ventana deslizante de 30/60/90 días
+- Añadir notificaciones automáticas (email/Telegram) con las sugerencias
+- Interfaz gráfica (Tkinter o web) para controlar el loop visualmente
+- Integrar modelos ML avanzados (RandomForest, XGBoost) en lugar de Markov simple
+
+NOTAS IMPORTANTES
+-----------------
+* Las loterías son juegos de azar puro. Ningún sistema puede garantizar
+  plenos (5/5). El "acierto >90%" se refiere a tener >=2 números
+  correctos en alguna de las 2 jugadas sugeridas, no ganar el premio mayor.
+* El sistema se auto-mejora con cada ciclo, ajustando los pesos de los
+  métodos según su rendimiento histórico real.
+* Los pesos se guardan en data/pesos_metodos.json y persisten entre ejecuciones.
+
+RESOLUCIÓN DE PROBLEMAS
+-----------------------
+Error: "ModuleNotFoundError: No module named 'google.generativeai'"
+  → pip install google-generativeai
+
+Error: "requests.exceptions.ConnectionError"
+  → Verificar conexión a internet
+
+Error al leer .xlsx del proyecto legado:
+  → Verificar que la ruta en config.py sea correcta:
+    BALOTO_LEGACY = r"D:\Proyectos_Programacion\machineLearning\baloto\baloto.xlsx"
+
+El scraper retorna 0 sorteos:
+  → El sitio baloto.com puede haber cambiado su estructura HTML.
+    Revisar scraper.py y ajustar los selectores CSS/etiquetas HTML.
+
+============================================================
+Soporte: Antigravity AI — Conversación 15c5f8ee
+============================================================

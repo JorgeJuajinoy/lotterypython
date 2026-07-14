@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lottery Loop — Informe de Sugerencias</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+    :root {
+      --bg:       #070D1A;
+      --surface:  #0F1E33;
+      --card:     #162236;
+      --border:   rgba(56,189,248,0.15);
+      --accent:   #38BDF8;
+      --text:     #E2E8F0;
+      --dim:      #64748B;
+      --green:    #22C55E;
+      --amber:    #F59E0B;
+      --red:      #EF4444;
+      --purple:   #A855F7;
+    }
+    body {
+      background: var(--bg);
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ─── HEADER ─────────────────────────── */
+    .header {
+      background: linear-gradient(135deg, #0F1E33 0%, #0A1628 60%, #070D1A 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 32px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .header-left h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+    .header-left p { color: var(--dim); font-size: 0.9rem; margin-top: 4px; }
+    .header-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .big-badge {
+      padding: 10px 24px;
+      border-radius: 50px;
+      font-weight: 800;
+      font-size: 1.4rem;
+      color: var(--bg);
+      background: #EF4444;
+      box-shadow: 0 0 24px #EF444460;
+    }
+    .big-badge-label { color: var(--dim); font-size: 0.8rem; text-align:right; }
+
+    /* ─── LAYOUT ─────────────────────────── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 36px 24px; }
+    .section { margin-bottom: 48px; }
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ─── CARDS DE JUEGO ─────────────────── */
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(56,189,248,0.12);
+    }
+    .card-header {
+      background: linear-gradient(90deg, rgba(56,189,248,0.08), transparent);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .game-title {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--accent);
+      flex: 1;
+    }
+    .plays-list { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+    .play-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .play-num {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--dim);
+      width: 20px;
+      text-align: center;
+    }
+    .balls { display: flex; flex-wrap: wrap; gap: 2px; flex: 1; align-items:center; }
+    .extra-pill {
+      background: rgba(168,85,247,0.2);
+      color: #C084FC;
+      border-radius: 8px;
+      padding: 3px 10px;
+      font-size: 0.8em;
+      margin-left: 6px;
+    }
+    .play-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 5px;
+      min-width: 90px;
+    }
+    .confidence {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.78rem;
+      color: var(--green);
+    }
+
+    /* ─── TABLAS ─────────────────────────── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    .data-table th {
+      background: rgba(56,189,248,0.07);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .data-table td {
+      padding: 11px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: var(--text);
+    }
+    .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .td-game { font-weight: 700; color: var(--accent); }
+    .bar-bg {
+      width: 100px; height: 6px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 3px; overflow: hidden;
+      display: inline-block; vertical-align: middle; margin-right: 8px;
+    }
+    .bar-fill { height: 100%; border-radius: 3px; transition: width .5s; }
+
+    /* ─── STATS TOP ROW ──────────────────── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .stat-label { font-size: 0.78rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.5px; }
+    .dim-text { color: var(--dim); font-style: italic; }
+
+    /* ─── CHART WRAPPER ──────────────────── */
+    .chart-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 24px;
+    }
+
+    /* ─── FOOTER ─────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--dim);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>🎯 Lottery Loop</h1>
+    <p>Sistema de predicción estadística + IA | 14/07/2026 16:01</p>
+  </div>
+  <div class="header-badge">
+    <div>
+      <div class="big-badge-label">Acierto global</div>
+      <div class="big-badge">9.0%</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- STATS RÁPIDAS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value" style="color:#EF4444">9.0%</div>
+      <div class="stat-label">Acierto Global</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">100</div>
+      <div class="stat-label">Jugadas Evaluadas</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">9</div>
+      <div class="stat-label">Hits (≥2✓)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">2</div>
+      <div class="stat-label">Jugadas/Juego</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">2</div>
+      <div class="stat-label">Mín. Aciertos Hit</div>
+    </div>
+  </div>
+
+  <!-- SUGERENCIAS HOY -->
+  <div class="section">
+    <h2 class="section-title">🃏 Sugerencias de Hoy</h2>
+    <div class="games-grid">
+      
+        <div class="card">
+          <div class="card-header">
+            <span class="game-title">BALOTO</span>
+            <span style="background:#22C55E;color:#0F172A;padding:3px 10px;border-radius:20px;font-size:0.78em;font-weight:700">HOY</span>
+          </div>
+          <div class="plays-list">
+        
+            <div class="play-row">
+              <div class="play-num">1</div>
+              <div class="balls"><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(379,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">11</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(379,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">17</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(379,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">24</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(379,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">26</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(379,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">38</span><span class="extra-pill">SuperBalota: <strong>3</strong></span></div>
+              <div class="play-meta">
+                <span style="background:#22C55E;color:#0F172A;padding:3px 10px;border-radius:20px;font-size:0.78em;font-weight:700">LOOP-MULTI</span>
+                <span class="confidence">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="#22C55E" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+                  2% conf.
+                </span>
+              </div>
+            </div>
+            
+            <div class="play-row">
+              <div class="play-num">2</div>
+              <div class="balls"><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(377,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">10</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(377,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">14</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(377,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">22</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(377,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">28</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(377,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">29</span><span class="extra-pill">SuperBalota: <strong>15</strong></span></div>
+              <div class="play-meta">
+                <span style="background:#22C55E;color:#0F172A;padding:3px 10px;border-radius:20px;font-size:0.78em;font-weight:700">LOOP-MULTI</span>
+                <span class="confidence">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="#22C55E" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+                  2% conf.
+                </span>
+              </div>
+            </div>
+            </div></div>
+        <div class="card">
+          <div class="card-header">
+            <span class="game-title">REVANCHA</span>
+            <span style="background:#22C55E;color:#0F172A;padding:3px 10px;border-radius:20px;font-size:0.78em;font-weight:700">HOY</span>
+          </div>
+          <div class="plays-list">
+        
+            <div class="play-row">
+              <div class="play-num">1</div>
+              <div class="balls"><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(372,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">15</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(372,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">18</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(372,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">22</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(372,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">28</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(372,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">38</span><span class="extra-pill">SuperBalota: <strong>13</strong></span></div>
+              <div class="play-meta">
+                <span style="background:#22C55E;color:#0F172A;padding:3px 10px;border-radius:20px;font-size:0.78em;font-weight:700">LOOP-MULTI</span>
+                <span class="confidence">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="#22C55E" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+                  2% conf.
+                </span>
+              </div>
+            </div>
+            
+            <div class="play-row">
+              <div class="play-num">2</div>
+              <div class="balls"><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(335,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">8</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(335,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">9</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(335,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">22</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(335,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">37</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(335,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">39</span><span class="extra-pill">SuperBalota: <strong>10</strong></span></div>
+              <div class="play-meta">
+                <span style="background:#22C55E;color:#0F172A;padding:3px 10px;border-radius:20px;font-size:0.78em;font-weight:700">LOOP-MULTI</span>
+                <span class="confidence">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="#22C55E" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+                  1% conf.
+                </span>
+              </div>
+            </div>
+            </div></div>
+        <div class="card">
+          <div class="card-header">
+            <span class="game-title">MILOTO</span>
+            <span style="background:#22C55E;color:#0F172A;padding:3px 10px;border-radius:20px;font-size:0.78em;font-weight:700">HOY</span>
+          </div>
+          <div class="plays-list">
+        
+            <div class="play-row">
+              <div class="play-num">1</div>
+              <div class="balls"><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(344,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">5</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(344,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">12</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(344,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">16</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(344,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">26</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(344,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">37</span></div>
+              <div class="play-meta">
+                <span style="background:#22C55E;color:#0F172A;padding:3px 10px;border-radius:20px;font-size:0.78em;font-weight:700">LOOP-MULTI</span>
+                <span class="confidence">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="#22C55E" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+                  1% conf.
+                </span>
+              </div>
+            </div>
+            
+            <div class="play-row">
+              <div class="play-num">2</div>
+              <div class="balls"><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(334,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">10</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(334,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">11</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(334,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">25</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(334,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">26</span><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:hsl(334,80%,50%);color:#fff;font-weight:800;font-size:1em;margin:2px;box-shadow:0 2px 8px rgba(0,0,0,0.4)">29</span></div>
+              <div class="play-meta">
+                <span style="background:#22C55E;color:#0F172A;padding:3px 10px;border-radius:20px;font-size:0.78em;font-weight:700">LOOP-MULTI</span>
+                <span class="confidence">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="#22C55E" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+                  1% conf.
+                </span>
+              </div>
+            </div>
+            </div></div>
+    </div>
+  </div>
+
+  <!-- VERIFICACIÓN -->
+  <div class="section">
+    <h2 class="section-title">✅ Verificación de Aciertos</h2>
+    
+    <table class="data-table">
+      <thead><tr>
+        <th>Juego</th><th>Evaluadas</th><th>Hits (≥2✓)</th>
+        <th>Prom. aciertos</th><th>% Éxito</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="td-game">BALOTO</td>
+          <td>50</td>
+          <td>5</td>
+          <td>0.6</td>
+          <td>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width:10%;background:#EF4444"></div>
+            </div>
+            <span style="color:#EF4444;font-weight:700">10.0%</span>
+          </td>
+        </tr>
+        
+        <tr>
+          <td class="td-game">REVANCHA</td>
+          <td>50</td>
+          <td>5</td>
+          <td>0.6</td>
+          <td>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width:10%;background:#EF4444"></div>
+            </div>
+            <span style="color:#EF4444;font-weight:700">10.0%</span>
+          </td>
+        </tr>
+        
+        <tr>
+          <td class="td-game">MILOTO</td>
+          <td>50</td>
+          <td>4</td>
+          <td>0.5</td>
+          <td>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width:8%;background:#EF4444"></div>
+            </div>
+            <span style="color:#EF4444;font-weight:700">8.0%</span>
+          </td>
+        </tr>
+        </tbody>
+    </table>
+    
+    <div class="chart-card">
+      <h3 style="font-size:.85rem;color:var(--dim);margin-bottom:16px">
+        RENDIMIENTO POR MÉTODO
+      </h3>
+      
+    <canvas id="metodoChart" style="max-height:220px"></canvas>
+    <script>
+    new Chart(document.getElementById('metodoChart'), {
+      type: 'bar',
+      data: {
+        labels: ['BACKTEST'],
+        datasets: [{
+          label: '% Éxito por Método',
+          data: [9.0],
+          backgroundColor: ['#38BDF8'],
+          borderRadius: 8,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, max: 100,
+               grid: { color: 'rgba(255,255,255,0.05)' },
+               ticks: { color: '#94A3B8' } },
+          x: { grid: { display: false },
+               ticks: { color: '#94A3B8' } },
+        }
+      }
+    });
+    </script>
+    
+    </div>
+  </div>
+
+  <!-- ITERACIONES DEL LOOP -->
+  <div class="section">
+    <h2 class="section-title">🔁 Historial de Iteraciones</h2>
+    
+    <table class="data-table">
+      <thead><tr><th>It.</th><th>Fecha</th><th>% Acierto</th>
+      <th>Evaluadas</th><th>Ajustes pesos</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>#1</td>
+          <td>2026-07-14 15:33:59</td>
+          <td style="color:#EF4444;font-weight:700">0.0%</td>
+          <td>0</td>
+          <td></td>
+        </tr>
+        
+        <tr>
+          <td>#2</td>
+          <td>2026-07-14 15:36:39</td>
+          <td style="color:#EF4444;font-weight:700">0.0%</td>
+          <td>0</td>
+          <td></td>
+        </tr>
+        
+        <tr>
+          <td>#3</td>
+          <td>2026-07-14 15:36:50</td>
+          <td style="color:#EF4444;font-weight:700">0.0%</td>
+          <td>0</td>
+          <td></td>
+        </tr>
+        
+        <tr>
+          <td>#4</td>
+          <td>2026-07-14 15:37:01</td>
+          <td style="color:#EF4444;font-weight:700">0.0%</td>
+          <td>0</td>
+          <td></td>
+        </tr>
+        
+        <tr>
+          <td>#5</td>
+          <td>2026-07-14 15:37:12</td>
+          <td style="color:#EF4444;font-weight:700">0.0%</td>
+          <td>0</td>
+          <td></td>
+        </tr>
+        
+        <tr>
+          <td>#6</td>
+          <td>2026-07-14 15:37:22</td>
+          <td style="color:#EF4444;font-weight:700">0.0%</td>
+          <td>0</td>
+          <td></td>
+        </tr>
+        
+        <tr>
+          <td>#7</td>
+          <td>2026-07-14 15:38:41</td>
+          <td style="color:#EF4444;font-weight:700">0.0%</td>
+          <td>0</td>
+          <td></td>
+        </tr>
+        
+        <tr>
+          <td>#8</td>
+          <td>2026-07-14 15:50:23</td>
+          <td style="color:#EF4444;font-weight:700">0.0%</td>
+          <td>0</td>
+          <td></td>
+        </tr>
+        
+        <tr>
+          <td>#9</td>
+          <td>2026-07-14 15:53:34</td>
+          <td style="color:#EF4444;font-weight:700">0.0%</td>
+          <td>0</td>
+          <td></td>
+        </tr>
+        
+        <tr>
+          <td>#10</td>
+          <td>2026-07-14 15:55:43</td>
+          <td style="color:#EF4444;font-weight:700">0.0%</td>
+          <td>0</td>
+          <td></td>
+        </tr>
+        
+        <tr>
+          <td>#11</td>
+          <td>2026-07-14 15:55:44</td>
+          <td style="color:#EF4444;font-weight:700">0.0%</td>
+          <td>0</td>
+          <td></td>
+        </tr>
+        
+        <tr>
+          <td>#12</td>
+          <td>2026-07-14 15:55:45</td>
+          <td style="color:#EF4444;font-weight:700">0.0%</td>
+          <td>0</td>
+          <td></td>
+        </tr>
+        
+        <tr>
+          <td>#13</td>
+          <td>2026-07-14 15:55:51</td>
+          <td style="color:#EF4444;font-weight:700">0.0%</td>
+          <td>0</td>
+          <td></td>
+        </tr>
+        
+        <tr>
+          <td>#14</td>
+          <td>2026-07-14 15:55:52</td>
+          <td style="color:#EF4444;font-weight:700">0.0%</td>
+          <td>0</td>
+          <td></td>
+        </tr>
+        
+        <tr>
+          <td>#15</td>
+          <td>2026-07-14 15:55:53</td>
+          <td style="color:#EF4444;font-weight:700">0.0%</td>
+          <td>0</td>
+          <td></td>
+        </tr>
+        
+        <tr>
+          <td>#16</td>
+          <td>2026-07-14 15:55:53</td>
+          <td style="color:#EF4444;font-weight:700">0.0%</td>
+          <td>0</td>
+          <td></td>
+        </tr>
+        
+        <tr>
+          <td>#17</td>
+          <td>2026-07-14 15:55:54</td>
+          <td style="color:#EF4444;font-weight:700">0.0%</td>
+          <td>0</td>
+          <td></td>
+        </tr>
+        
+        <tr>
+          <td>#18</td>
+          <td>2026-07-14 15:55:55</td>
+          <td style="color:#EF4444;font-weight:700">0.0%</td>
+          <td>0</td>
+          <td></td>
+        </tr>
+        
+        <tr>
+          <td>#19</td>
+          <td>2026-07-14 15:58:05</td>
+          <td style="color:#EF4444;font-weight:700">11.0%</td>
+          <td>100</td>
+          <td>M1_freq=-0.12, M3_gap=-0.1, M8_tendencia=-0.13, M9_markov=-0.11</td>
+        </tr>
+        
+        <tr>
+          <td>#20</td>
+          <td>2026-07-14 16:01:20</td>
+          <td style="color:#EF4444;font-weight:700">10.0%</td>
+          <td>100</td>
+          <td>M1_freq=-0.108, M3_gap=-0.09, M8_tendencia=-0.117, M9_markov=-0.099</td>
+        </tr>
+        
+        <tr>
+          <td>#21</td>
+          <td>2026-07-14 16:01:28</td>
+          <td style="color:#EF4444;font-weight:700">9.0%</td>
+          <td>100</td>
+          <td></td>
+        </tr>
+        </tbody>
+    </table>
+    
+  </div>
+
+</div>
+
+<footer>
+  Generado por Lottery Loop · 14/07/2026 16:01 · 
+  Criterio: ≥2 aciertos por jugada = HIT · Objetivo: 90%
+</footer>
+</body>
+</html>

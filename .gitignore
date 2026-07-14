@@ -1,0 +1,20 @@
+# Ignorar variables de entorno (API Keys privadas)
+.env
+
+# Entornos virtuales de Python
+venv/
+.venv/
+env/
+ENV/
+
+# Cache de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Archivos temporales o de sistema
+.DS_Store
+Thumbs.db
+*.tmp
+*.log

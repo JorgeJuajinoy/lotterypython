@@ -1,0 +1,180 @@
+[
+  {
+    "iteracion": 1,
+    "timestamp": "2026-07-14 15:33:59",
+    "acierto_pct": 0.0,
+    "n_evaluadas": 0,
+    "n_hits": 0,
+    "pesos_delta": {}
+  },
+  {
+    "iteracion": 2,
+    "timestamp": "2026-07-14 15:36:39",
+    "acierto_pct": 0.0,
+    "n_evaluadas": 0,
+    "n_hits": 0,
+    "pesos_delta": {}
+  },
+  {
+    "iteracion": 3,
+    "timestamp": "2026-07-14 15:36:50",
+    "acierto_pct": 0.0,
+    "n_evaluadas": 0,
+    "n_hits": 0,
+    "pesos_delta": {}
+  },
+  {
+    "iteracion": 4,
+    "timestamp": "2026-07-14 15:37:01",
+    "acierto_pct": 0.0,
+    "n_evaluadas": 0,
+    "n_hits": 0,
+    "pesos_delta": {}
+  },
+  {
+    "iteracion": 5,
+    "timestamp": "2026-07-14 15:37:12",
+    "acierto_pct": 0.0,
+    "n_evaluadas": 0,
+    "n_hits": 0,
+    "pesos_delta": {}
+  },
+  {
+    "iteracion": 6,
+    "timestamp": "2026-07-14 15:37:22",
+    "acierto_pct": 0.0,
+    "n_evaluadas": 0,
+    "n_hits": 0,
+    "pesos_delta": {}
+  },
+  {
+    "iteracion": 1,
+    "timestamp": "2026-07-14 15:38:41",
+    "acierto_pct": 0.0,
+    "n_evaluadas": 0,
+    "n_hits": 0,
+    "pesos_delta": {}
+  },
+  {
+    "iteracion": 1,
+    "timestamp": "2026-07-14 15:50:23",
+    "acierto_pct": 0.0,
+    "n_evaluadas": 0,
+    "n_hits": 0,
+    "pesos_delta": {}
+  },
+  {
+    "iteracion": 1,
+    "timestamp": "2026-07-14 15:53:34",
+    "acierto_pct": 0.0,
+    "n_evaluadas": 0,
+    "n_hits": 0,
+    "pesos_delta": {}
+  },
+  {
+    "iteracion": 2,
+    "timestamp": "2026-07-14 15:55:43",
+    "acierto_pct": 0.0,
+    "n_evaluadas": 0,
+    "n_hits": 0,
+    "pesos_delta": {}
+  },
+  {
+    "iteracion": 3,
+    "timestamp": "2026-07-14 15:55:44",
+    "acierto_pct": 0.0,
+    "n_evaluadas": 0,
+    "n_hits": 0,
+    "pesos_delta": {}
+  },
+  {
+    "iteracion": 4,
+    "timestamp": "2026-07-14 15:55:45",
+    "acierto_pct": 0.0,
+    "n_evaluadas": 0,
+    "n_hits": 0,
+    "pesos_delta": {}
+  },
+  {
+    "iteracion": 5,
+    "timestamp": "2026-07-14 15:55:51",
+    "acierto_pct": 0.0,
+    "n_evaluadas": 0,
+    "n_hits": 0,
+    "pesos_delta": {}
+  },
+  {
+    "iteracion": 6,
+    "timestamp": "2026-07-14 15:55:52",
+    "acierto_pct": 0.0,
+    "n_evaluadas": 0,
+    "n_hits": 0,
+    "pesos_delta": {}
+  },
+  {
+    "iteracion": 7,
+    "timestamp": "2026-07-14 15:55:53",
+    "acierto_pct": 0.0,
+    "n_evaluadas": 0,
+    "n_hits": 0,
+    "pesos_delta": {}
+  },
+  {
+    "iteracion": 8,
+    "timestamp": "2026-07-14 15:55:53",
+    "acierto_pct": 0.0,
+    "n_evaluadas": 0,
+    "n_hits": 0,
+    "pesos_delta": {}
+  },
+  {
+    "iteracion": 9,
+    "timestamp": "2026-07-14 15:55:54",
+    "acierto_pct": 0.0,
+    "n_evaluadas": 0,
+    "n_hits": 0,
+    "pesos_delta": {}
+  },
+  {
+    "iteracion": 10,
+    "timestamp": "2026-07-14 15:55:55",
+    "acierto_pct": 0.0,
+    "n_evaluadas": 0,
+    "n_hits": 0,
+    "pesos_delta": {}
+  },
+  {
+    "iteracion": 1,
+    "timestamp": "2026-07-14 15:58:05",
+    "acierto_pct": 0.11,
+    "n_evaluadas": 100,
+    "n_hits": 11,
+    "pesos_delta": {
+      "M1_freq": -0.12,
+      "M3_gap": -0.1,
+      "M8_tendencia": -0.13,
+      "M9_markov": -0.11
+    }
+  },
+  {
+    "iteracion": 2,
+    "timestamp": "2026-07-14 16:01:20",
+    "acierto_pct": 0.1,
+    "n_evaluadas": 100,
+    "n_hits": 10,
+    "pesos_delta": {
+      "M1_freq": -0.108,
+      "M3_gap": -0.09,
+      "M8_tendencia": -0.117,
+      "M9_markov": -0.099
+    }
+  },
+  {
+    "iteracion": 3,
+    "timestamp": "2026-07-14 16:01:28",
+    "acierto_pct": 0.09,
+    "n_evaluadas": 100,
+    "n_hits": 9,
+    "pesos_delta": {}
+  }
+]
