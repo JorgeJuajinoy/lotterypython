@@ -1,10 +1,10 @@
 {
-  "M1_freq": 0.972,
+  "M1_freq": 0.787,
   "M2_pos": 0.8,
-  "M3_gap": 0.81,
+  "M3_gap": 0.656,
   "M5_pares": 0.9,
   "M6_paridad": 0.5,
   "M7_decadas": 0.6,
-  "M8_tendencia": 1.053,
-  "M9_markov": 0.891
+  "M8_tendencia": 0.853,
+  "M9_markov": 0.722
 }

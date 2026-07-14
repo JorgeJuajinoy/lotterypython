@@ -42,6 +42,8 @@ INFORME_XLSX        = os.path.join(REPORTS_DIR, "informe_loop.xlsx")
 # Edita el archivo .env en esta misma carpeta para cambiar la key:
 #   GOOGLE_API_KEY=tu_nueva_key_aqui
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
+IA_MODEL_NAME  = "gemini-2.0-flash"
+
 
 # --- REGLAS DE JUEGO ---
 JUEGOS = {
