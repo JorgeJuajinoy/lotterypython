@@ -306,5 +306,104 @@
       "M8_tendencia": -0.041,
       "M9_markov": -0.035
     }
+  },
+  {
+    "iteracion": 7,
+    "timestamp": "2026-07-14 16:36:15",
+    "acierto_pct": 0.11,
+    "n_evaluadas": 100,
+    "n_hits": 11,
+    "pesos_delta": {
+      "M1_freq": -0.034,
+      "M3_gap": -0.028,
+      "M8_tendencia": -0.037,
+      "M9_markov": -0.031
+    }
+  },
+  {
+    "iteracion": 8,
+    "timestamp": "2026-07-14 16:36:47",
+    "acierto_pct": 0.11,
+    "n_evaluadas": 100,
+    "n_hits": 11,
+    "pesos_delta": {
+      "M1_freq": -0.03,
+      "M3_gap": -0.025,
+      "M8_tendencia": -0.033,
+      "M9_markov": -0.028
+    }
+  },
+  {
+    "iteracion": 9,
+    "timestamp": "2026-07-14 16:37:15",
+    "acierto_pct": 0.11,
+    "n_evaluadas": 100,
+    "n_hits": 11,
+    "pesos_delta": {
+      "M1_freq": -0.027,
+      "M3_gap": -0.023,
+      "M8_tendencia": -0.03,
+      "M9_markov": -0.025
+    }
+  },
+  {
+    "iteracion": 10,
+    "timestamp": "2026-07-14 16:37:51",
+    "acierto_pct": 0.12,
+    "n_evaluadas": 100,
+    "n_hits": 12,
+    "pesos_delta": {}
+  },
+  {
+    "iteracion": 1,
+    "timestamp": "2026-07-14 16:38:55",
+    "acierto_pct": 0.11,
+    "n_evaluadas": 100,
+    "n_hits": 11,
+    "pesos_delta": {
+      "M1_freq": -0.027,
+      "M3_gap": -0.023,
+      "M8_tendencia": -0.03,
+      "M9_markov": -0.025
+    }
+  },
+  {
+    "iteracion": 2,
+    "timestamp": "2026-07-14 16:39:23",
+    "acierto_pct": 0.12,
+    "n_evaluadas": 100,
+    "n_hits": 12,
+    "pesos_delta": {
+      "M1_freq": -0.025,
+      "M3_gap": -0.021,
+      "M8_tendencia": -0.027,
+      "M9_markov": -0.023
+    }
+  },
+  {
+    "iteracion": 3,
+    "timestamp": "2026-07-14 16:39:49",
+    "acierto_pct": 0.12,
+    "n_evaluadas": 100,
+    "n_hits": 12,
+    "pesos_delta": {
+      "M1_freq": -0.022,
+      "M3_gap": -0.018,
+      "M8_tendencia": -0.024,
+      "M9_markov": -0.02
+    }
+  },
+  {
+    "iteracion": 1,
+    "timestamp": "2026-07-14 16:40:50",
+    "acierto_pct": 0.14,
+    "n_evaluadas": 100,
+    "n_hits": 14,
+    "pesos_delta": {
+      "M1_freq": -0.02,
+      "M3_gap": -0.017,
+      "M8_tendencia": -0.022,
+      "M9_markov": -0.018
+    }
   }
 ]
