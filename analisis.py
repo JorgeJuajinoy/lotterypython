@@ -209,16 +209,12 @@ def cadenas_markov(df: pd.DataFrame, n_cols: int, rango: int) -> dict:
 
 
 # ─────────────────────────────────────────────
-# Método 10 — IA Gemini
+# Método 10 — IA Gemini (Calificación de Patrones)
 # ─────────────────────────────────────────────
-def sugerencia_ia(juego: str, df: pd.DataFrame, n_cols: int, rango: int,
-                   extra_rango: int | None, sug_base: list[int]) -> dict | None:
+def calificar_patrones_ia(juego: str, analisis_result: dict, jugadas: list[dict]) -> dict | None:
     """
-    Llama a Gemini con prompt ultra-compacto para minimizar tokens.
-    - Solo envía los 5 sorteos más recientes (no 15)
-    - Solo envía top-5 números más frecuentes (no historial completo)
-    - Limita la respuesta a 60 tokens máximo
-    - Usa google.genai (librería nueva, no la deprecada)
+    Llama a Gemini para evaluar los patrones estadísticos detectados y las 
+    jugadas generadas, retornando un breve texto de análisis y un score.
     """
     if not config.GOOGLE_API_KEY:
         return None
@@ -229,33 +225,22 @@ def sugerencia_ia(juego: str, df: pd.DataFrame, n_cols: int, rango: int,
 
         client = genai.Client(api_key=config.GOOGLE_API_KEY)
 
-        # ── Historial ultra-compacto: solo últimos 5 sorteos ──────────
-        hist_parts = []
-        for _, row in df.head(5).iterrows():
-            nums = [str(int(row[f"N{i+1}"])) for i in range(n_cols)
-                    if pd.notna(row.get(f"N{i+1}"))]
-            if nums:
-                hist_parts.append("-".join(nums))
-        hist_str = "|".join(hist_parts)  # ej: "3-12-22-31-40|5-11-19-28-38"
+        # Resumen de patrones
+        M1 = analisis_result.get("M1_frecuencia", {}).get("frecuencia", {})
+        top5 = [str(k) for k, _ in sorted(M1.items(), key=lambda x: -x[1])[:5]]
+        
+        M8 = analisis_result.get("M8_tendencia", {})
+        alza = [str(x) for x in M8.get("en_alza", [])[:3]]
 
-        # ── Top-5 números más frecuentes (resumen estadístico mínimo) ─
-        from collections import Counter
-        flat = []
-        for _, row in df.head(50).iterrows():
-            flat += [int(row[f"N{i+1}"]) for i in range(n_cols)
-                     if pd.notna(row.get(f"N{i+1}"))]
-        top5 = [str(n) for n, _ in Counter(flat).most_common(5)]
-        top_str = "-".join(top5)
+        j_nums = []
+        for j in jugadas:
+            j_nums.append("-".join(map(str, j.get("numeros", []))))
 
-        extra_hint = f",e:1-{extra_rango}" if extra_rango else ""
-        base_str   = "-".join(map(str, sug_base))
-
-        # Prompt mínimo: <80 tokens de entrada
         prompt = (
-            f"{juego} r:1-{rango} base:{base_str} "
-            f"rec:{hist_str} top:{top_str}"
-            f"{extra_hint} "
-            f'JSON:{{"s":[5 nums]{extra_hint},"c":0-100}}'
+            f"Juego:{juego}. Top históricos: {','.join(top5)}. En alza reciente: {','.join(alza)}. "
+            f"Jugadas propuestas por alg: {' | '.join(j_nums)}. "
+            f"Evalúa brevemente los patrones y califica de 0 a 100. "
+            f'JSON: {{"analisis":"texto breve max 150 chars","score": 85}}'
         )
 
         time.sleep(2)
@@ -263,22 +248,20 @@ def sugerencia_ia(juego: str, df: pd.DataFrame, n_cols: int, rango: int,
             model=config.IA_MODEL_NAME,
             contents=prompt,
             config=types.GenerateContentConfig(
-                max_output_tokens=80,
+                max_output_tokens=150,
                 temperature=0.7,
             ),
         )
         text = resp.text.replace("```json", "").replace("```", "").strip()
-
-        # Parsear respuesta flexible: acepta {"s":[...]} o {"sugerencia":[...]}
-        import re
-        data_raw = json.loads(text)
-        nums_ia  = data_raw.get("s", data_raw.get("sugerencia", []))
-        conf     = data_raw.get("c", data_raw.get("confianza", 50))
-
-        return {"sugerencia": nums_ia, "confianza": conf,
-                "especial": data_raw.get("e", data_raw.get("especial"))}
+        
+        import json
+        data = json.loads(text)
+        return {
+            "analisis": data.get("analisis", "Análisis no disponible"),
+            "score": data.get("score", 50)
+        }
     except Exception as e:
-        print(f"  [IA] Error para {juego}: {e}")
+        print(f"  [IA] Error calificando {juego}: {e}")
         return None
 
 

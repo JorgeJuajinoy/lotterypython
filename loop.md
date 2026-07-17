@@ -42,13 +42,14 @@ Aplica 9 métodos estadísticos sobre los 300 sorteos descargados:
 | M7 | Análisis por décadas |
 | M8 | Tendencia temporal (ventana 30 sorteos) |
 | M9 | Cadenas de Markov |
-| M10 | IA Gemini (requiere API key activa) |
+
+*(Nota: La IA ya no genera sugerencias en este paso para optimizar rendimiento y cuota de API).*
 
 ### Paso 3 — Sugerencias (`sugerencias.py`)
-- Combina los métodos con **pesos ponderados** (ajustables por el loop)
-- Genera **máximo 2 jugadas** por juego
-- Filtra por suma estadística y distribución par/impar histórica
-- Guarda historial en `data/sugerencias_historico.xlsx`
+- Combina los 9 métodos locales con **pesos ponderados** (ajustables por el loop).
+- Genera **máximo 2 jugadas** por juego de forma determinista (sin usar API web).
+- Filtra por suma estadística y distribución par/impar histórica.
+- Guarda historial en `data/sugerencias_historico.xlsx`.
 
 ### Paso 4 — Verificación con Backtest (`verificacion.py`)
 **Modo backtest histórico** (activo por defecto):
@@ -65,10 +66,11 @@ Aplica 9 métodos estadísticos sobre los 300 sorteos descargados:
 - Si acierto < 90%, ajusta los pesos de cada método (±10%)
 - Los pesos se persisten en `data/pesos_metodos.json`
 
-### Paso 6 — Informe (`informe.py`)
-- HTML: `reports/informe_loop.html` (abrir con doble clic)
-- Excel: `reports/informe_loop.xlsx`
-- Si el Excel está abierto, guarda con sufijo de hora automáticamente
+### Paso 6 — Informe y Análisis IA (`informe.py`)
+- Al terminar el loop de iteraciones, se solicita a Gemini (API) **una única vez por juego** que evalúe cualitativamente los patrones estadísticos (top números, rachas, etc.).
+- HTML: `reports/informe_loop.html` (incluye sección con el veredicto y score de la IA).
+- Excel: `reports/informe_loop.xlsx`.
+- Si el Excel está abierto, guarda con sufijo de hora automáticamente.
 
 ---
 

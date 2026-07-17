@@ -234,60 +234,7 @@ def generar_jugadas(juego: str, df: pd.DataFrame,
     return jugadas[:n_jugadas]
 
 
-# ─────────────────────────────────────────────
-# Llamada IA (Método 10)
-# ─────────────────────────────────────────────
-def enriquecer_con_ia(jugadas: list[dict], df: pd.DataFrame,
-                       analisis_result: dict) -> list[dict]:
-    """
-    Intenta mejorar la jugada #1 con una sugerencia de Gemini.
-    Si la IA responde, la agrega como jugada extra (no reemplaza).
-    """
-    if not jugadas:
-        return jugadas
 
-    juego    = jugadas[0]["juego"]
-    cfg      = config.JUEGOS.get(juego, {})
-    n_nums   = cfg.get("n_nums", 5)
-    rango    = cfg.get("rango", 43)
-    extra_r  = cfg.get("extra", {}).get("rango") if cfg.get("extra") else None
-    sug_base = jugadas[0]["numeros"]
-
-    ia_data = an.sugerencia_ia(juego, df, n_nums, rango, extra_r, sug_base)
-    if not ia_data:
-        return jugadas
-
-    nums_ia = ia_data.get("sugerencia", [])
-    if not isinstance(nums_ia, list) or len(nums_ia) != n_nums:
-        return jugadas
-    nums_ia = [int(n) for n in nums_ia if 1 <= int(n) <= rango]
-    if len(nums_ia) != n_nums:
-        return jugadas
-
-    jugada_ia = {
-        "juego":  juego,
-        "numeros": sorted(nums_ia),
-        "score":  float(ia_data.get("confianza", 50)) / 100,
-        "suma":   sum(nums_ia),
-        "metodo": "IA-GEMINI",
-        "fecha":  datetime.now().strftime("%Y-%m-%d"),
-    }
-    if extra_r and "especial" in ia_data:
-        try:
-            esp = int(ia_data["especial"])
-            if 1 <= esp <= extra_r:
-                jugada_ia["extra"] = esp
-                jugada_ia["extra_nombre"] = cfg["extra"]["nombre"]
-        except Exception:
-            pass
-
-    # La jugada IA reemplaza la de menor score si ya tenemos el máximo
-    if len(jugadas) >= config.N_SUGERENCIAS:
-        jugadas[-1] = jugada_ia
-    else:
-        jugadas.append(jugada_ia)
-
-    return jugadas
 
 
 # ─────────────────────────────────────────────
@@ -335,8 +282,7 @@ def generar_todas(datos: dict[str, pd.DataFrame],
         print(f"\n[SUGERENCIAS] {juego}")
         jugadas = generar_jugadas(juego, df, ar, pesos, config.N_SUGERENCIAS)
 
-        if usar_ia and jugadas:
-            jugadas = enriquecer_con_ia(jugadas, df, ar)
+
 
         resultado[juego] = jugadas
         for j in jugadas:

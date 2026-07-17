@@ -185,12 +185,36 @@ def _chart_js_script(veri: dict) -> str:
     """
 
 
+def _seccion_ia(calificaciones_ia: dict) -> str:
+    if not calificaciones_ia:
+        return ""
+    html = '<div class="section"><h2 class="section-title">🧠 Análisis IA de Patrones</h2><div class="games-grid">'
+    for juego, calif in calificaciones_ia.items():
+        score = calif.get("score", 50)
+        analisis = calif.get("analisis", "")
+        color = "#22C55E" if score >= 80 else ("#F59E0B" if score >= 50 else "#EF4444")
+        html += f"""
+        <div class="card" style="border-left: 4px solid {color}">
+          <div class="card-header">
+            <span class="game-title">{juego}</span>
+            <span style="background:{color};color:#0F172A;padding:3px 10px;border-radius:20px;font-size:0.78em;font-weight:700">{score}/100</span>
+          </div>
+          <div style="padding: 16px; font-size: 0.9rem; color: #E2E8F0; line-height: 1.5; font-style: italic;">
+            "{analisis}"
+          </div>
+        </div>
+        """
+    html += '</div></div>'
+    return html
+
+
 # ─────────────────────────────────────────────
 # GENERAR HTML
 # ─────────────────────────────────────────────
 def generar_html(sugerencias_por_juego: dict,
                  veri: dict,
                  loop_log: list[dict],
+                 calificaciones_ia: dict = None,
                  filepath: str = None) -> str:
 
     if filepath is None:
@@ -205,6 +229,7 @@ def generar_html(sugerencias_por_juego: dict,
     html_veri   = _tabla_verificacion(veri)
     html_iters  = _seccion_iteraciones(loop_log)
     html_chart  = _chart_js_script(veri)
+    html_ia     = _seccion_ia(calificaciones_ia)
 
     html = f"""<!DOCTYPE html>
 <html lang="es">
@@ -488,6 +513,8 @@ def generar_html(sugerencias_por_juego: dict,
       {html_sug}
     </div>
   </div>
+
+  {html_ia}
 
   <!-- VERIFICACIÓN -->
   <div class="section">

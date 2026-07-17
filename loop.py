@@ -174,7 +174,25 @@ def ejecutar_loop(n_sorteos: int = 300,
     # ── RESUMEN FINAL ────────────────────────────────────────────────
     print(f"\n{'='*60}")
     print(f"  LOOP FINALIZADO")
-    print(f"  Iteraciones realizadas: {iteracion}")
+    
+    calificaciones_ia = {}
+    if usar_ia and 'todas_sug' in locals() and an_cache:
+        print("\n  [IA] SOLICITANDO ANÁLISIS DE PATRONES A GEMINI...")
+        for juego in ["BALOTO", "REVANCHA", "MILOTO"]:
+            ar = an_cache.get(juego)
+            jugs = todas_sug.get(juego, [])
+            if ar and jugs:
+                calif = an.calificar_patrones_ia(juego, ar, jugs)
+                if calif:
+                    calificaciones_ia[juego] = calif
+                    print(f"    - {juego}: {calif['score']}/100 -> {calif['analisis']}")
+        
+        if calificaciones_ia:
+            print("  >> Actualizando informes con análisis IA...")
+            informe.generar_html(todas_sug, veri, log, calificaciones_ia=calificaciones_ia)
+            # generar_excel no cambia por ahora, pero se le puede pasar si se desea
+    
+    print(f"\n  Iteraciones realizadas: {iteracion}")
     print(f"  Acierto final:          {acierto_actual * 100:.1f}%")
     print(f"  Objetivo:               {objetivo * 100:.0f}%")
     alcanzado = acierto_actual >= objetivo
