@@ -261,7 +261,14 @@ def calificar_patrones_ia(juego: str, analisis_result: dict, jugadas: list[dict]
             "score": data.get("score", 50)
         }
     except Exception as e:
-        print(f"  [IA] Error calificando {juego}: {e}")
+        err_str = str(e)
+        if "401" in err_str or "UNAUTHENTICATED" in err_str:
+            msg = "Clave de API inválida o mal copiada (Error 401)."
+        elif "429" in err_str or "RESOURCE_EXHAUSTED" in err_str:
+            msg = "Límite de cuota gratuita alcanzado (Error 429). Espera unos minutos."
+        else:
+            msg = "Fallo de conexión o respuesta inesperada."
+        print(f"    [IA] No se pudo calificar {juego}: {msg}")
         return None
 
 
